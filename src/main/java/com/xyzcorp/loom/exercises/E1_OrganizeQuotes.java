@@ -13,11 +13,6 @@ public class E1_OrganizeQuotes {
         Callable<String> phrase5 = () -> {Thread.sleep(100);return "with four or five cupcakes. ";};
 
         //Use whatever executor service, combination you would like to put these in order.
-        //Don't change the timing in the callables
-
-        "inside me there is a thin person"
-
-
-
+        //Don't change the timing in the callables, must have a minimum of two executors
     }
 }
