@@ -25,9 +25,9 @@ public class D9_StructuredConcurrencyWithStructuredErrors {
     public static void main(String[] args) throws ExecutionException,
         InterruptedException {
         long start = System.currentTimeMillis();
-        ThreadFactory tf = Thread.builder().virtual().factory();
+        ThreadFactory tf = Thread.ofVirtual().name("structured-concurrency-errors").factory();
         try (ExecutorService e =
-                 Executors.newThreadExecutor(tf).withDeadline(Instant.now().plusSeconds(10))) {
+                 Executors.newThreadExecutor(tf, Instant.now().plusSeconds(10))) {
             List<Callable<String>> xs = List.of(
                 () -> ("a"),
                 () -> { throw new IOException("Ooops"); },

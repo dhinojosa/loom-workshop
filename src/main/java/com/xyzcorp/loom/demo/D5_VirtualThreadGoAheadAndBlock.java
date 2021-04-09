@@ -16,7 +16,8 @@ public class D5_VirtualThreadGoAheadAndBlock {
 
         Thread.sleep(20000);
 
-        ThreadFactory tf = Thread.builder().virtual().factory();
+        long startTime = System.currentTimeMillis();
+        ThreadFactory tf = Thread.ofVirtual().name("thread-go-and-block").factory();
         ExecutorService executorService = Executors.newThreadExecutor(tf);
         //ExecutorService executorService = Executors.newFixedThreadPool(8);
         Stream<Callable<Integer>> callableStream =
@@ -32,5 +33,6 @@ public class D5_VirtualThreadGoAheadAndBlock {
         List<Callable<Integer>> callables = callableStream.limit(80).toList();
         executorService.invokeAll(callables);
         executorService.shutdown();
+        System.out.println("Done:" + (System.currentTimeMillis() - startTime));
     }
 }

@@ -25,11 +25,12 @@ public class D6_StructuredConcurrency {
         throws InterruptedException {
 
         long start = System.currentTimeMillis();
-        ThreadFactory tf = Thread.builder().virtual().factory();
+        ThreadFactory tf = Thread.ofVirtual().name("immediate-start").factory();
         try (ExecutorService e = Executors.newThreadExecutor(tf)) {
             e.submit(D6_StructuredConcurrency::task1);
             e.submit(D6_StructuredConcurrency::task2);
         }//join
+
         long end = System.currentTimeMillis();
         System.out.format("This took %d milliseconds\n", end - start);
     }

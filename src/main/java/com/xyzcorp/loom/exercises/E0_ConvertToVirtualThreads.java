@@ -4,10 +4,8 @@ public class E0_ConvertToVirtualThreads {
     // Display a message, preceded by
     // the name of the current thread
     static void threadMessage(String message) {
-        String threadName =
-            Thread.currentThread().getName();
         System.out.format("%s: %s%n",
-            threadName,
+            Thread.currentThread(),
             message);
     }
 
@@ -57,8 +55,7 @@ public class E0_ConvertToVirtualThreads {
 
         threadMessage("Starting MessageLoop thread");
         long startTime = System.currentTimeMillis();
-        Thread t = new Thread(new MessageLoop());
-        t.start();
+        Thread t = Thread.startVirtualThread(new MessageLoop());
 
         threadMessage("Waiting for MessageLoop thread to finish");
         // loop until MessageLoop

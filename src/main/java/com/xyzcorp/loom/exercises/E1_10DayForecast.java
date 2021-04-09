@@ -11,16 +11,18 @@ import java.util.stream.Stream;
 
 public class E1_10DayForecast {
 
+    private static final ThreadFactory threadFactory =
+        Thread.ofVirtual().name("10-day-forecast").factory();
+
     public static String getRandomWeatherString() {
         Random random = new Random();
-        List<String> conditions = List.of("Sunny", "Overcast", "Raining",
-            "Snowing", "Hail");
+        List<String> conditions =
+            List.of("Sunny", "Overcast", "Raining", "Snowing", "Hail");
         return conditions.get(random.nextInt(conditions.size()));
     }
 
     public static void getRandomWeatherByDate(LocalDate localDate) {
-        ThreadFactory tf = Thread.builder().virtual().factory();
-        try (ExecutorService e = Executors.newThreadExecutor(tf)) {
+        try (ExecutorService e = Executors.newThreadExecutor(threadFactory)) {
             Stream.iterate(localDate.atStartOfDay(),
                 localDateTime -> isSameDay(localDate, localDateTime),
                 ldt -> ldt.plusHours(1))
@@ -31,13 +33,13 @@ public class E1_10DayForecast {
     }
 
     private static PrintStream printWeatherFor(LocalDate localDate,
-                                         java.time.LocalDateTime localDateTime) {
+                                               java.time.LocalDateTime localDateTime) {
         return System.out.printf("%s %s %s\n", localDate, localDateTime,
             getRandomWeatherString());
     }
 
     private static boolean isSameDay(LocalDate localDate,
-                                      java.time.LocalDateTime localDateTime) {
+                                     java.time.LocalDateTime localDateTime) {
         return localDate.getDayOfMonth() == localDateTime.getDayOfMonth() &&
             localDate.getMonth() == localDateTime.getMonth();
     }
@@ -45,8 +47,7 @@ public class E1_10DayForecast {
     //Create one Method that will use an execution context to iterate for the
     // next 10 days
     public static void iterateOverNextTenDays() {
-        ThreadFactory tf = Thread.builder().virtual().factory();
-        try (ExecutorService e = Executors.newThreadExecutor(tf)) {
+        try (ExecutorService e = Executors.newThreadExecutor(threadFactory)) {
             Stream
                 .iterate(LocalDate.now(), localDate -> localDate.plusDays(1))
                 .limit(10)

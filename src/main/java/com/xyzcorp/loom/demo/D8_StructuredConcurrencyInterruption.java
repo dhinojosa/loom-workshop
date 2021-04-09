@@ -6,9 +6,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 public class D8_StructuredConcurrencyInterruption {
+    static ThreadFactory tf = Thread.ofVirtual().name("structured-concurrency-interruption").factory();
 
     public static void task1() {
-        ThreadFactory tf = Thread.builder().virtual().factory();
+
         try (ExecutorService e = Executors.newThreadExecutor(tf)) {
             e.submit(() -> {
                 try {
@@ -61,9 +62,8 @@ public class D8_StructuredConcurrencyInterruption {
      */
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
-        ThreadFactory tf = Thread.builder().virtual().factory();
         try (ExecutorService e =
-                 Executors.newThreadExecutor(tf).withDeadline(Instant.now().plusSeconds(10))) {
+                 Executors.newThreadExecutor(tf,Instant.now().plusSeconds(10))) {
             e.submit(D8_StructuredConcurrencyInterruption::task1);
             e.submit(D8_StructuredConcurrencyInterruption::task2);
         }
