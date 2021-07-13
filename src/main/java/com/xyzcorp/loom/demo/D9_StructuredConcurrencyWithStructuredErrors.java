@@ -12,7 +12,7 @@ public class D9_StructuredConcurrencyWithStructuredErrors {
      * watchful parent, and the failure can then be put in context, for
      * example by stitching the child exception’s stack trace to its parent’s
      * stack trace.
-     *
+     * <p>
      * But error propagation poses some challenges. Suppose that an exception
      * thrown by a child would automatically propagate to its parent that, as
      * a result, would then cancel (interrupt) all of its other children.
@@ -25,12 +25,19 @@ public class D9_StructuredConcurrencyWithStructuredErrors {
     public static void main(String[] args) throws ExecutionException,
         InterruptedException {
         long start = System.currentTimeMillis();
-        ThreadFactory tf = Thread.ofVirtual().name("structured-concurrency-errors").factory();
+        ThreadFactory tf =
+            Thread.ofVirtual()
+                  .name("structured-concurrency-errors")
+                  .factory();
+
         try (ExecutorService e =
-                 Executors.newThreadExecutor(tf, Instant.now().plusSeconds(10))) {
+                 Executors.newThreadExecutor(tf,
+                     Instant.now().plusSeconds(10))) {
             List<Callable<String>> xs = List.of(
                 () -> ("a"),
-                () -> { throw new IOException("Ooops"); },
+                () -> {
+                    throw new IOException("Ooops");
+                },
                 () -> "b");
             String result = e.invokeAny(xs);
             System.out.println(result);
