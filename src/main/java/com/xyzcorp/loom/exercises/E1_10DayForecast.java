@@ -23,12 +23,7 @@ public class E1_10DayForecast {
 
     public static void getRandomWeatherByDate(LocalDate localDate) {
         try (ExecutorService e = Executors.newThreadExecutor(threadFactory)) {
-            Stream.iterate(localDate.atStartOfDay(),
-                localDateTime -> isSameDay(localDate, localDateTime),
-                ldt -> ldt.plusHours(1))
-                  .forEach(localDateTime ->
-                      e.submit(() ->
-                          printWeatherFor(localDate, localDateTime)));
+            //Iterate over 12AM-11PM
         }//join
     }
 
@@ -48,10 +43,7 @@ public class E1_10DayForecast {
     // next 10 days
     public static void iterateOverNextTenDays() {
         try (ExecutorService e = Executors.newThreadExecutor(threadFactory)) {
-            Stream
-                .iterate(LocalDate.now(), localDate -> localDate.plusDays(1))
-                .limit(10)
-                .forEach(date -> e.submit(() -> getRandomWeatherByDate(date)));
+            //Iterate over the next ten days
         }//join
     }
 
