@@ -55,7 +55,8 @@ public class E0_ConvertToVirtualThreads {
 
         threadMessage("Starting MessageLoop thread");
         long startTime = System.currentTimeMillis();
-        Thread t = Thread.startVirtualThread(new MessageLoop());
+        Thread t = new Thread(new MessageLoop());
+        t.start();
 
         threadMessage("Waiting for MessageLoop thread to finish");
         // loop until MessageLoop
