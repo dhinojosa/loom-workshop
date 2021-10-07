@@ -6,7 +6,7 @@ public class D4_VirtualThreadWithFactory {
     public static void main(String[] args)
         throws ExecutionException, InterruptedException {
 
-        ThreadFactory tf = Thread.ofVirtual().name("10-day-forecast").factory();
+        ThreadFactory tf = Thread.ofVirtual().name("virtual-with-executors").factory();
         ExecutorService executorService = Executors.newThreadExecutor(tf);
         Future<Integer> submit = executorService.submit(() -> {
             System.out.format("Running in Thread: %s\n",

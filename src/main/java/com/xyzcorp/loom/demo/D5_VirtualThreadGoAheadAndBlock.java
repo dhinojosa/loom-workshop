@@ -17,7 +17,10 @@ public class D5_VirtualThreadGoAheadAndBlock {
         Thread.sleep(20000);
 
         long startTime = System.currentTimeMillis();
-        ThreadFactory tf = Thread.ofVirtual().name("thread-go-and-block").factory();
+        ThreadFactory tf = Thread
+            .ofVirtual()
+            .name("thread-go-and-block")
+            .factory();
         ExecutorService executorService = Executors.newThreadExecutor(tf);
         //ExecutorService executorService = Executors.newFixedThreadPool(8);
         Stream<Callable<Integer>> callableStream =
