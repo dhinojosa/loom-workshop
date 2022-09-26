@@ -21,7 +21,7 @@ public class D5_VirtualThreadGoAheadAndBlock {
             .ofVirtual()
             .name("thread-go-and-block")
             .factory();
-        ExecutorService executorService = Executors.newThreadExecutor(tf);
+        ExecutorService executorService = Executors.newThreadPerTaskExecutor(tf);
         //ExecutorService executorService = Executors.newFixedThreadPool(8);
         Stream<Callable<Integer>> callableStream =
             Stream.iterate(0, integer -> integer + 1).map(i -> () -> {

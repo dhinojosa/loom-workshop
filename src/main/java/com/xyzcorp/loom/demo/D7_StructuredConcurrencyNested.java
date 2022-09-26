@@ -10,7 +10,7 @@ public class D7_StructuredConcurrencyNested {
     static ThreadFactory tf = Thread.ofVirtual().name("structured-concurrency-nested").factory();
 
     public static void task1() {
-        try (ExecutorService e = Executors.newThreadExecutor(tf)) {
+        try (ExecutorService e = Executors.newThreadPerTaskExecutor(tf)) {
             Callable<PrintStream> printStreamCallable = () -> {
                 Thread.sleep(4000);
                 return System.out.printf("Performed Subtask in Thread %s\n",
@@ -36,7 +36,7 @@ public class D7_StructuredConcurrencyNested {
         throws InterruptedException {
 
         long start = System.currentTimeMillis();
-        try (ExecutorService e = Executors.newThreadExecutor(tf)) {
+        try (ExecutorService e = Executors.newThreadPerTaskExecutor(tf)) {
             e.submit(D7_StructuredConcurrencyNested::task1);
             e.submit(D7_StructuredConcurrencyNested::task2);
         }//join

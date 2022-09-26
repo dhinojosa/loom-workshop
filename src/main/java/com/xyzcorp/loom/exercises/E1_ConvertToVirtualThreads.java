@@ -1,6 +1,6 @@
 package com.xyzcorp.loom.exercises;
 
-public class E0_ConvertToVirtualThreads {
+public class E1_ConvertToVirtualThreads {
     // Display a message, preceded by
     // the name of the current thread
     static void threadMessage(String message) {
@@ -12,20 +12,18 @@ public class E0_ConvertToVirtualThreads {
     private static class MessageLoop
         implements Runnable {
         public void run() {
-            String importantInfo[] = {
+            String[] importantInfo = {
                 "Mares eat oats",
                 "Does eat oats",
                 "Little lambs eat ivy",
                 "A kid will eat ivy too"
             };
             try {
-                for (int i = 0;
-                     i < importantInfo.length;
-                     i++) {
+                for (String s : importantInfo) {
                     // Pause for 4 seconds
                     Thread.sleep(4000);
                     // Print a message
-                    threadMessage(importantInfo[i]);
+                    threadMessage(s);
                 }
             } catch (InterruptedException e) {
                 threadMessage("I wasn't done!");
@@ -33,7 +31,7 @@ public class E0_ConvertToVirtualThreads {
         }
     }
 
-    public static void main(String args[])
+    public static void main(String[] args)
         throws InterruptedException {
 
         // Delay, in milliseconds before

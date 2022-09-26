@@ -1,9 +1,13 @@
 package com.xyzcorp.loom.demo;
 
+import jdk.incubator.concurrent.StructuredTaskScope;
+
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class D9_StructuredConcurrencyWithStructuredErrors {
     /**
@@ -12,7 +16,6 @@ public class D9_StructuredConcurrencyWithStructuredErrors {
      * watchful parent, and the failure can then be put in context, for
      * example by stitching the child exception’s stack trace to its parent’s
      * stack trace.
-     *
      * But error propagation poses some challenges. Suppose that an exception
      * thrown by a child would automatically propagate to its parent that, as
      * a result, would then cancel (interrupt) all of its other children.
@@ -23,17 +26,21 @@ public class D9_StructuredConcurrencyWithStructuredErrors {
      * @param args - arguments to the main application
      */
     public static void main(String[] args) throws ExecutionException,
-        InterruptedException {
+        InterruptedException, TimeoutException {
         long start = System.currentTimeMillis();
-        ThreadFactory tf = Thread.ofVirtual().name("structured-concurrency-errors").factory();
-        try (ExecutorService e =
-                 Executors.newThreadExecutor(tf, Instant.now().plusSeconds(10))) {
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             List<Callable<String>> xs = List.of(
                 () -> ("a"),
                 () -> { throw new IOException("Ooops"); },
                 () -> "b");
-            String result = e.invokeAny(xs);
-            System.out.println(result);
+            xs.stream().map(scope::fork).forEach(f -> {
+                try {
+                    System.out.printf("Future received: %s", f.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            scope.joinUntil(Instant.now().plusSeconds(2));
         }
         long end = System.currentTimeMillis();
         System.out.format("This took %d milliseconds\n", end - start);

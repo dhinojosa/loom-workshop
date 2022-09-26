@@ -2,20 +2,16 @@ package com.xyzcorp.loom.demo;
 
 public class D2_VirtualThreadWithBuilderImmediateStart {
     public static void main(String[] args) throws InterruptedException {
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Virtual Thread, Non-Lazy, Immediate" + System.currentTimeMillis());
-            }
-        };
+        Runnable task = () ->
+            System.out.format("Virtual Thread, Non-Lazy, Immediate: %s%n", System.currentTimeMillis());
 
-        Thread thread = Thread
+        Thread
             .ofVirtual()
             .start(task);
 
-         Thread thread2 = Thread
+        Thread
             .ofVirtual()
-            .start(task); //change to unstarted
+            .start(task);
 
         Thread.sleep(4000);
         System.out.println("The time is: " + System.currentTimeMillis());

@@ -1,17 +1,22 @@
 package com.xyzcorp.loom.demo;
 
-import java.time.Instant;
+
+import jdk.incubator.concurrent.StructuredTaskScope;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 public class D8_StructuredConcurrencyInterruption {
-    static ThreadFactory tf = Thread.ofVirtual().name("structured-concurrency-interruption").factory();
+    static ThreadFactory tf = Thread
+        .ofVirtual()
+        .name("structured-concurrency-interruption")
+        .factory();
 
-    public static void task1() {
 
-        try (ExecutorService e = Executors.newThreadExecutor(tf)) {
-            e.submit(() -> {
+    public static Void task1() {
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            scope.fork(() -> {
                 try {
                     Thread.sleep(12000); //Reset to 12000
                     System.out.printf("Performed Subtask 1 in Thread %s\n",
@@ -21,8 +26,9 @@ public class D8_StructuredConcurrencyInterruption {
                         "task 1");
                     interruptedException.printStackTrace();
                 }
+                return null;
             });
-            e.submit(() -> {
+            scope.fork(() -> {
                 try {
                     Thread.sleep(7000);
                     System.out.printf("Performed Subtask 2 in Thread %s\n"
@@ -32,8 +38,10 @@ public class D8_StructuredConcurrencyInterruption {
                         "in task 1");
                     interruptedException.printStackTrace();
                 }
+                return null;
             });
         }
+        return null;
     }
 
     public static void task2() {
@@ -63,7 +71,7 @@ public class D8_StructuredConcurrencyInterruption {
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
         try (ExecutorService e =
-                 Executors.newThreadExecutor(tf,Instant.now().plusSeconds(10))) {
+                 Executors.newThreadPerTaskExecutor(tf)) {
             e.submit(D8_StructuredConcurrencyInterruption::task1);
             e.submit(D8_StructuredConcurrencyInterruption::task2);
         }
