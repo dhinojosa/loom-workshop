@@ -21,21 +21,23 @@ public class D5_VirtualThreadGoAheadAndBlock {
             .ofVirtual()
             .name("thread-go-and-block")
             .factory();
-        ExecutorService executorService = Executors.newThreadPerTaskExecutor(tf);
-        //ExecutorService executorService = Executors.newFixedThreadPool(8);
-        Stream<Callable<Integer>> callableStream =
-            Stream.iterate(0, integer -> integer + 1).map(i -> () -> {
-                System.out.format("Process(%d) Started: inside of Thread %s\n",
-                    i, Thread.currentThread());
-                Thread.sleep(5000); //Block
-                System.out.format("Process(%d) Finished: Inside of Thread %s\n"
-                    , i, Thread.currentThread());
-                return 100;
-            });
+        try (
+            //ExecutorService executorService = Executors.newThreadPerTaskExecutor(tf)) {
+            ExecutorService executorService = Executors.newFixedThreadPool(8)) {
+            Stream<Callable<Integer>> callableStream =
+                Stream.iterate(0, integer -> integer + 1).map(i -> () -> {
+                    System.out.format("Process(%d) Started: inside of Thread %s\n",
+                        i, Thread.currentThread());
+                    Thread.sleep(5000); //Block
+                    System.out.format("Process(%d) Finished: Inside of Thread %s\n"
+                        , i, Thread.currentThread());
+                    return 100;
+                });
 
-        List<Callable<Integer>> callables = callableStream.limit(80).toList();
-        executorService.invokeAll(callables);
-        executorService.shutdown();
-        System.out.println("Done:" + (System.currentTimeMillis() - startTime));
+            List<Callable<Integer>> callables = callableStream.limit(80).toList();
+            executorService.invokeAll(callables);
+            executorService.shutdown();
+            System.out.println("Done:" + (System.currentTimeMillis() - startTime));
+        }
     }
 }

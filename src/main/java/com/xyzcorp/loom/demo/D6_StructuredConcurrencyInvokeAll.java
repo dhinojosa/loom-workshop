@@ -2,7 +2,9 @@ package com.xyzcorp.loom.demo;
 
 import jdk.incubator.concurrent.StructuredTaskScope;
 
-public class D6_StructuredConcurrency {
+import java.util.concurrent.ExecutionException;
+
+public class D6_StructuredConcurrencyInvokeAll {
     public static Void task1() {
         try {
             Thread.sleep(3000);
@@ -22,15 +24,15 @@ public class D6_StructuredConcurrency {
     }
 
     public static void main(String[] args)
-        throws InterruptedException {
+        throws InterruptedException, ExecutionException {
 
         long start = System.currentTimeMillis();
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            scope.fork(D6_StructuredConcurrency::task1);
-            scope.fork(D6_StructuredConcurrency::task2);
+            scope.fork(D6_StructuredConcurrencyInvokeAll::task1);
+            scope.fork(D6_StructuredConcurrencyInvokeAll::task2);
             scope.join(); //join
+            scope.throwIfFailed();
         }
-
         long end = System.currentTimeMillis();
         System.out.format("This took %d milliseconds\n", end - start);
     }

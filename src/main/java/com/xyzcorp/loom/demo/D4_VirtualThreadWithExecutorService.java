@@ -2,7 +2,7 @@ package com.xyzcorp.loom.demo;
 
 import java.util.concurrent.*;
 
-public class D4_VirtualThreadWithFactory {
+public class D4_VirtualThreadWithExecutorService {
     public static void main(String[] args)
         throws ExecutionException, InterruptedException {
 

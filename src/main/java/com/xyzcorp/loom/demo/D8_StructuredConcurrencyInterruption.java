@@ -3,8 +3,8 @@ package com.xyzcorp.loom.demo;
 
 import jdk.incubator.concurrent.StructuredTaskScope;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
 public class D8_StructuredConcurrencyInterruption {
@@ -14,45 +14,31 @@ public class D8_StructuredConcurrencyInterruption {
         .factory();
 
 
-    public static Void task1() {
+    public static String task1() throws InterruptedException, ExecutionException {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            scope.fork(() -> {
-                try {
-                    Thread.sleep(12000); //Reset to 12000
-                    System.out.printf("Performed Subtask 1 in Thread %s\n",
-                        Thread.currentThread());
-                } catch (InterruptedException interruptedException) {
-                    System.out.println("Caught Interruption in subtask 1 in " +
-                        "task 1");
-                    interruptedException.printStackTrace();
-                }
-                return null;
+            Future<String> first = scope.fork(() -> {
+                Thread.sleep(12000); //Reset to 12000
+                System.out.printf("Performed Subtask 1 in Thread %s\n",
+                    Thread.currentThread());
+                return "Three";
             });
-            scope.fork(() -> {
-                try {
-                    Thread.sleep(7000);
-                    System.out.printf("Performed Subtask 2 in Thread %s\n"
-                        , Thread.currentThread());
-                } catch (InterruptedException interruptedException) {
-                    System.out.println("Caught Interruption in subtask 2 " +
-                        "in task 1");
-                    interruptedException.printStackTrace();
-                }
-                return null;
+            Future<String> second = scope.fork(() -> {
+                Thread.sleep(7000);
+                System.out.printf("Performed Subtask 2 in Thread %s\n",
+                    Thread.currentThread());
+                return "Two";
             });
+            scope.join();
+            scope.throwIfFailed();
+            return String.format("%s %s", first.resultNow(), second.resultNow());
         }
-        return null;
     }
 
-    public static void task2() {
-        try {
-            Thread.sleep(2000);
-            System.out.printf("Performed Task 2 in %s\n",
-                Thread.currentThread());
-        } catch (InterruptedException interruptedException) {
-            System.out.println("Caught Interruption in task 2");
-            interruptedException.printStackTrace();
-        }
+    public static String task2() throws InterruptedException {
+        Thread.sleep(2000);
+        System.out.printf("Performed Task 2 in %s\n",
+            Thread.currentThread());
+        return "One";
     }
 
     /**
@@ -68,12 +54,17 @@ public class D8_StructuredConcurrencyInterruption {
      *
      * @param args - arguments to the main application
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException,
+        InterruptedException {
         long start = System.currentTimeMillis();
-        try (ExecutorService e =
-                 Executors.newThreadPerTaskExecutor(tf)) {
-            e.submit(D8_StructuredConcurrencyInterruption::task1);
-            e.submit(D8_StructuredConcurrencyInterruption::task2);
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            Future<String> first =
+                scope.fork(D8_StructuredConcurrencyInterruption::task1);
+            Future<String> second =
+                scope.fork(D8_StructuredConcurrencyInterruption::task2);
+            scope.join();
+            scope.throwIfFailed();
+            System.out.format("%s %s%n", first.resultNow(), second.resultNow());
         }
         long end = System.currentTimeMillis();
         System.out.format("This took %d seconds\n", end - start);

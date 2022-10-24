@@ -6,8 +6,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.Future;
 
 public class D9_StructuredConcurrencyWithStructuredErrors {
     /**
@@ -25,24 +24,26 @@ public class D9_StructuredConcurrencyWithStructuredErrors {
      *
      * @param args - arguments to the main application
      */
-    public static void main(String[] args) throws ExecutionException,
-        InterruptedException, TimeoutException {
+    public static void main(String[] args) throws Throwable {
         long start = System.currentTimeMillis();
+        System.out.println(processCallables());
+        long end = System.currentTimeMillis();
+        System.out.format("This took %d milliseconds\n", end - start);
+    }
+
+    private static List<String> processCallables() throws Throwable {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             List<Callable<String>> xs = List.of(
                 () -> ("a"),
-                () -> { throw new IOException("Ooops"); },
+                () -> {
+                    throw new IOException("Ooops");
+                },
                 () -> "b");
-            xs.stream().map(scope::fork).forEach(f -> {
-                try {
-                    System.out.printf("Future received: %s", f.get());
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            List<Future<String>> futures =
+                xs.stream().map(scope::fork).toList();
             scope.joinUntil(Instant.now().plusSeconds(2));
+            scope.throwIfFailed(e -> e);
+            return futures.stream().map(Future::resultNow).toList();
         }
-        long end = System.currentTimeMillis();
-        System.out.format("This took %d milliseconds\n", end - start);
     }
 }
