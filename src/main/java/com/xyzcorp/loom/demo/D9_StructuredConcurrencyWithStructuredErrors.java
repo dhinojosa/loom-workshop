@@ -35,9 +35,9 @@ public class D9_StructuredConcurrencyWithStructuredErrors {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             List<Callable<String>> xs = List.of(
                 () -> ("a"),
-                () -> {
-                    throw new IOException("Ooops");
-                },
+//                () -> {
+//                    throw new IOException("Ooops");
+//                },
                 () -> "b");
             List<Future<String>> futures =
                 xs.stream().map(scope::fork).toList();
